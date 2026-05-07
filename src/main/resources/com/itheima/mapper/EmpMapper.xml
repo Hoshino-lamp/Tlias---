@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.EmpMapper">
+    <update id="updateById">
+        update emp
+        <set>
+            <if test="name != null and name != ''">name=#{name},</if>
+            <if test="gender != null">gender=#{gender},</if>
+            <if test="phone != null and phone != ''">phone=#{phone},</if>
+            <if test="job != null">job=#{job},</if>
+            <if test="salary != null">salary=#{salary},</if>
+            <if test="image != null and image != ''">image=#{image},</if>
+            <if test="entryDate != null">entry_date=#{entryDate},</if>
+            <if test="deptId != null">dept_id=#{deptId},</if>
+            <if test="updateTime != null">update_time=#{updateTime},</if>
+            <if test="username != null and username != ''">username=#{username},</if>
+            <if test="password != null and password != ''">password=#{password},</if>
+            <if test="createTime != null">create_time=#{createTime},</if>
+        </set>
+        where id=#{id}
+    </update>
+    <select id="list" resultType="com.itheima.pojo.Emp">
+        select e.*,d.name deptName from emp e left join dept d on e.dept_id=d.id
+                 <where>
+                     <if test="name!=null and name!=''">
+                         e.name like concat('%',#{name},'%')
+                     </if>
+                     <if test="gender!=null">
+                         and e.gender=#{gender}
+                     </if>
+                     <if test="begin!=null and end!=null">
+                         and e.entry_date between #{begin} and #{end}
+                     </if>
+                 </where>
+                 order by e.update_time desc
+    </select>
+    <select id="countEmpJobData" resultType="java.util.Map">
+        select
+            (case when job=1 then '班主任'
+                  when job=2 then '讲师'
+                  when job=3 then '学工主管'
+                  when job=4 then '教研主管'
+                  when job=5 then '咨询师'
+                  else '其他' end) pos,
+            count(*) num from emp group by job order by num
+    </select>
+    <select id="countEmpGenderData" resultType="java.util.Map">
+        select
+            if(gender=1,'男性员工','女性员工') name,
+            count(*) value
+        from emp group by gender
+    </select>
+    <select id="countStudentDegreeData" resultType="java.util.Map">
+        #学历（1：初中 2：高中 3：大专 4：本科 5：硕士 6：博士）
+        select
+            (case when degree=1 then '初中'
+                  when degree=2 then '高中'
+                  when degree=3 then '大专'
+                  when degree=4 then '本科'
+                  when degree=5 then '硕士'
+                  when degree=6 then '博士'
+                  else '其他' end) name,
+            count(*) value
+        from student group by degree
+    </select>
+    <select id="countStudentCountData" resultType="java.util.Map">
+        select
+            (case when clazz_id=1 then 'Java全栈就业班'
+                  when clazz_id=2 then 'Python数据分析班'
+                  when clazz_id=3 then '前端开发精英班'
+                  when clazz_id=4 then '大数据开发班'
+                  when clazz_id=5 then '软件测试实战班'
+                  when clazz_id=6 then 'UI设计精品班'
+                  when clazz_id=7 then 'Go语言后端班'
+                  when clazz_id=8 then '物联网开发班'
+                  when clazz_id=9 then '云计算运维班'
+                  when clazz_id=10 then '人工智能基础班'
+                  when clazz_id=11 then '网络安全工程师班'
+                  when clazz_id=12 then '清北班'
+                  when clazz_id=13 then '中医药学班'
+                  when clazz_id=14 then '雷霆嘎巴班'
+                  else '其他' end) pos,
+            count(*) num
+        from student
+        group by clazz_id
+        order by num
+
+    </select>
+    <delete id="delete">
+        delete from emp where id in
+        <foreach item="id" collection="ids" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
